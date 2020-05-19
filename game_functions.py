@@ -6,7 +6,7 @@ from bullet import Bullet
 from alien import Alien
 
 
-def check_keydown(event, ai_settings, screen, stats, scoreboard, ship, aliens, bullets):
+def check_keydown(event, ai_settings, screen, stats, scoreboard, ship, aliens, bullets, shot_sound):
     """Respond to key presses"""
     # Ship controls are disabled when then the game is not running
     controls_enabled = stats.game_active and not stats.pause
@@ -15,7 +15,7 @@ def check_keydown(event, ai_settings, screen, stats, scoreboard, ship, aliens, b
     elif event.key == pygame.K_d or event.key == pygame.K_RIGHT and controls_enabled:
         ship.moving_right = True
     elif event.key == pygame.K_SPACE and controls_enabled:
-        fire_bullet(ai_settings, screen, ship, bullets)
+        fire_bullet(ai_settings, screen, ship, bullets, shot_sound)
     elif event.key == pygame.K_q and not controls_enabled:
         exit_game(stats)
     elif event.key == pygame.K_p:
@@ -33,14 +33,16 @@ def check_keyup(event, ship):
         ship.moving_right = False
 
 
-def check_events(ai_settings, screen, stats, scoreboard, play_button, ship, aliens, bullets):
+def check_events(ai_settings, screen, stats, scoreboard, play_button,
+                 ship, aliens, bullets, shot_sound):
     """Respond to key and mouse events"""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit_game(stats)
 
         elif event.type == pygame.KEYDOWN:
-            check_keydown(event, ai_settings, screen, stats, scoreboard, ship, aliens, bullets)
+            check_keydown(event, ai_settings, screen, stats, scoreboard,
+                          ship, aliens, bullets, shot_sound)
 
         elif event.type == pygame.KEYUP:
             check_keyup(event, ship)
@@ -61,12 +63,14 @@ def switch_pause_mode(stats):
     """Pause or resume the game"""
     if stats.pause:
         # Resume the game
-        pygame.mouse.set_visible(False)
         stats.pause = False
+        pygame.mouse.set_visible(False)
+        pygame.mixer_music.play(-1)
     else:
         # Pause the game
-        pygame.mouse.set_visible(True)
         stats.pause = True
+        pygame.mouse.set_visible(True)
+        pygame.mixer_music.stop()
 
 
 def check_play_button(ai_settings, screen, stats, scoreboard, play_button,
@@ -106,16 +110,23 @@ def start_game(ai_settings, screen, stats, scoreboard, ship, aliens, bullets):
     create_fleet(ai_settings, screen, ship, aliens)
     ship.center_ship()
 
+    # Play background music
+    pygame.mixer_music.play(-1)
 
-def fire_bullet(ai_settings, screen, ship, bullets):
+
+def fire_bullet(ai_settings, screen, ship, bullets, shot_sound):
     """Fire a bullet if limit not reached yet"""
-    # Create a new bullet and add    it to the bullets group
+    # Create a new bullet and add it to the bullets group
     if len(bullets) < ai_settings.bullets_allowed:
+        # Play shot sound
+        shot_sound.play()
+
         new_bullet = Bullet(ai_settings, screen, ship)
         bullets.add(new_bullet)
 
 
-def update_bullets(ai_settings, screen, stats, scoreboard, ship, aliens, bullets):
+def update_bullets(ai_settings, screen, stats, scoreboard,
+                   ship, aliens, bullets, alien_death_sound, level_up_sound):
     """Update position of bullets and get rid of old bullets"""
     # Update bullet positions
     bullets.update()
@@ -127,22 +138,32 @@ def update_bullets(ai_settings, screen, stats, scoreboard, ship, aliens, bullets
 
     # Check for any bullets that have hit aliens
     # If so, get rid of the bullet and the alien
-    check_bullet_alien_collisions(ai_settings, screen, stats, scoreboard, ship, aliens, bullets)
+    check_bullet_alien_collisions(ai_settings, screen, stats, scoreboard,
+                                  ship, aliens, bullets,
+                                  alien_death_sound, level_up_sound)
 
 
-def check_bullet_alien_collisions(ai_settings, screen, stats, scoreboard, ship, aliens, bullets):
+def check_bullet_alien_collisions(ai_settings, screen, stats, scoreboard,
+                                  ship, aliens, bullets,
+                                  alien_death_sound, level_up_sound):
     """Respond to bullet-alien collisions"""
     # Remove any bullets and aliens that have collided
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
     if collisions:
-        # Make sure we score all hits
+        # Make sure we handle all hits
         for aliens in collisions.values():
+            # Play the sound
+            alien_death_sound.play()
+            # Increment score
             stats.score += ai_settings.alien_points * len(aliens)
             scoreboard.prep_score()
         check_high_score(stats, scoreboard)
 
     # Check if all aliens have been destroyed
     if len(aliens) == 0:
+        # Play level up sound
+        level_up_sound.play()
+
         # Destroy existing bullets, speed up the game, and start a new level
         bullets.empty()
         ai_settings.increase_speed()
@@ -221,9 +242,13 @@ def change_fleet_direction(ai_settings, aliens):
     ai_settings.fleet_direction *= -1
 
 
-def ship_hit(ai_settings, stats, screen, scoreboard, ship, aliens, bullets):
+def ship_hit(ai_settings, stats, screen, scoreboard,
+             ship, aliens, bullets, collision_sound, game_over_sound):
     """Respond to ship being hit by alien"""
     if stats.ships_left > 0:
+        # Play the collision sound
+        collision_sound.play()
+
         # Decrement ships left
         stats.ships_left -= 1
 
@@ -238,25 +263,31 @@ def ship_hit(ai_settings, stats, screen, scoreboard, ship, aliens, bullets):
         create_fleet(ai_settings, screen, ship, aliens)
         ship.center_ship()
 
-        # Pause
-        sleep(0.7)
+        # Pause; freezes the music when called
+        # sleep(0.7)
     else:
         # Stop the game and make the cursor reappear
+        game_over_sound.play()
         stats.game_active = False
         pygame.mouse.set_visible(True)
+        pygame.mixer_music.stop()
 
 
-def check_aliens_bottom(ai_settings, stats, screen, scoreboard, ship, aliens, bullets):
+def check_aliens_bottom(ai_settings, stats, screen, scoreboard,
+                        ship, aliens, bullets, collision_sound, game_over_sound):
     """Check if any aliens have reached the bottom of the screen"""
     screen_rect = screen.get_rect()
     for alien in aliens.sprites():
         if alien.rect.bottom >= screen_rect.bottom:
             # Treat this as if the ship was hit
-            ship_hit(ai_settings, stats, screen, scoreboard, ship, aliens, bullets)
+            ship_hit(ai_settings, stats, screen, scoreboard,
+                     ship, aliens, bullets, collision_sound, game_over_sound)
             break
 
 
-def update_aliens(ai_settings, stats, screen, scoreboard, ship, aliens, bullets):
+def update_aliens(ai_settings, stats, screen, scoreboard,
+                  ship, aliens, bullets,
+                  collision_sound, game_over_sound):
     """
     Check if the fleet is at an edge
     and then update the positions of all the aliens in the fleet
@@ -266,10 +297,14 @@ def update_aliens(ai_settings, stats, screen, scoreboard, ship, aliens, bullets)
 
     # Check for alien-ship collisions
     if pygame.sprite.spritecollideany(ship, aliens):
-        ship_hit(ai_settings, stats, screen, scoreboard, ship, aliens, bullets)
+        ship_hit(ai_settings, stats, screen, scoreboard,
+                 ship, aliens, bullets,
+                 collision_sound, game_over_sound)
 
     # Look for aliens hitting the bottom of the screen
-    check_aliens_bottom(ai_settings, stats, screen, scoreboard, ship, aliens, bullets)
+    check_aliens_bottom(ai_settings, stats, screen, scoreboard,
+                        ship, aliens, bullets,
+                        collision_sound, game_over_sound)
 
 
 def update_screen(ai_settings, screen, stats, scoreboard, ship, aliens, bullets, play_button):
