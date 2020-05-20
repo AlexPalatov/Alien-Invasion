@@ -1,9 +1,10 @@
+import os
 import pygame
 from pygame.sprite import Group
 from pygame.mixer import Sound
 
-from settings import Settings
 from ship import Ship
+from settings import Settings
 from game_stats import GameStats
 from button import Button
 from scoreboard import Scoreboard
@@ -27,13 +28,18 @@ def run_game():
     stats = GameStats(ai_settings)
     scoreboard = Scoreboard(ai_settings, screen, stats)
 
+    # Load background image
+    bg_image_path = os.path.join(os.path.dirname(__file__), 'images/background.bmp')
+    bg_image = pygame.image.load(bg_image_path)
+
     # Load sounds
-    shot_sound = Sound('sounds/shot.wav')
-    collision_sound = Sound('sounds/collision.wav')
-    alien_death_sound = Sound('sounds/alien_destruction.wav')
-    level_up_sound = Sound('sounds/level_up.wav')
-    game_over_sound = Sound('sounds/game_over.wav')
-    pygame.mixer_music.load('sounds/background.wav')
+    file_path = os.path.dirname(__file__)
+    shot_sound = Sound(os.path.join(file_path, 'sounds/shot.wav'))
+    collision_sound = Sound(os.path.join(file_path,'sounds/collision.wav'))
+    alien_death_sound = Sound(os.path.join(file_path, 'sounds/alien_destruction.wav'))
+    level_up_sound = Sound(os.path.join(file_path, 'sounds/level_up.wav'))
+    game_over_sound = Sound(os.path.join(file_path, 'sounds/game_over.wav'))
+    pygame.mixer_music.load(os.path.join(file_path, 'sounds/background.wav'))
 
     # Make a ship
     ship = Ship(screen, ai_settings)
@@ -55,9 +61,10 @@ def run_game():
                               ship, aliens, bullets,
                               alien_death_sound, level_up_sound)
             gf.update_aliens(ai_settings, stats, screen, scoreboard,
-                             ship, aliens, bullets, collision_sound, game_over_sound)
+                             ship, aliens, bullets,
+                             collision_sound, game_over_sound)
         gf.update_screen(ai_settings, screen, stats, scoreboard,
-                         ship, aliens, bullets, play_button)
+                         ship, aliens, bullets, play_button, bg_image)
 
 
 run_game()

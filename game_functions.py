@@ -1,5 +1,4 @@
 import sys
-from time import sleep
 import pygame
 
 from bullet import Bullet
@@ -191,7 +190,7 @@ def get_number_aliens_x(ai_settings, alien_width):
 
 def get_number_rows(ai_settings, ship_height, alien_height):
     """Determine the number of rows of aliens that fit on the screen"""
-    available_space_y = (ai_settings.screen_height - ship_height - 3.5 * alien_height)
+    available_space_y = (ai_settings.screen_height - ship_height - 5 * alien_height)
     number_rows = int(available_space_y / (1.5 * alien_height))
     return number_rows
 
@@ -205,7 +204,7 @@ def create_alien(ai_settings, screen, aliens, alien_number, row_number, alien_wi
     alien.rect.x = alien.x
 
     # Set the y position
-    alien.rect.y = 1.5 * alien_height + 1.5 * alien_height * row_number
+    alien.rect.y = 3 * alien_height + 1.5 * alien_height * row_number
     aliens.add(alien)
 
 
@@ -246,8 +245,10 @@ def ship_hit(ai_settings, stats, screen, scoreboard,
              ship, aliens, bullets, collision_sound, game_over_sound):
     """Respond to ship being hit by alien"""
     if stats.ships_left > 0:
-        # Play the collision sound
+        # Wait until the collision sound has been played
         collision_sound.play()
+        while pygame.mixer.get_busy():
+            pass
 
         # Decrement ships left
         stats.ships_left -= 1
@@ -262,9 +263,6 @@ def ship_hit(ai_settings, stats, screen, scoreboard,
         # Create a new fleet and center the ship
         create_fleet(ai_settings, screen, ship, aliens)
         ship.center_ship()
-
-        # Pause; freezes the music when called
-        # sleep(0.7)
     else:
         # Stop the game and make the cursor reappear
         game_over_sound.play()
@@ -274,7 +272,8 @@ def ship_hit(ai_settings, stats, screen, scoreboard,
 
 
 def check_aliens_bottom(ai_settings, stats, screen, scoreboard,
-                        ship, aliens, bullets, collision_sound, game_over_sound):
+                        ship, aliens, bullets,
+                        collision_sound, game_over_sound):
     """Check if any aliens have reached the bottom of the screen"""
     screen_rect = screen.get_rect()
     for alien in aliens.sprites():
@@ -307,10 +306,14 @@ def update_aliens(ai_settings, stats, screen, scoreboard,
                         collision_sound, game_over_sound)
 
 
-def update_screen(ai_settings, screen, stats, scoreboard, ship, aliens, bullets, play_button):
+def update_screen(ai_settings, screen, stats, scoreboard,
+                  ship, aliens, bullets, play_button, bg_image):
     """Update images on the screen and flip to the new screen"""
+    # Disable the timer if it's active
+
     # Redraw the screen during each pass through the loop
-    screen.fill(ai_settings.bg_color)
+    #screen.fill(ai_settings.bg_color)
+    screen.blit(bg_image, (0, 0))
 
     # Redraw all bullets behind ship and aliens
     for bullet in bullets.sprites():

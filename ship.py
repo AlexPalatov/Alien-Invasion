@@ -1,3 +1,5 @@
+import os
+
 import pygame
 from pygame.sprite import Sprite
 
@@ -10,7 +12,8 @@ class Ship(Sprite):
         self.ai_settings = ai_settings
 
         # load the ship image and get its rectangle
-        self.image = pygame.image.load('images/ship.bmp')
+        file_path = os.path.dirname(__file__)
+        self.image = pygame.image.load(os.path.join(file_path, 'images/ship.bmp'))
         self.rect = self.image.get_rect()
         self.screen_rect = screen.get_rect()
 

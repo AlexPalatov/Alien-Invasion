@@ -1,4 +1,6 @@
+import os
 import json
+
 from game_config import config as default_config
 
 
@@ -64,10 +66,11 @@ class Settings():
         Load the the game's settings' configuration from config.json.
         Get the default configuration if the config file is missing and save the config
         """
+        config_file_path = os.path.join(os.path.dirname(__file__), 'config.json')
         try:
-            with open('config.json') as config_file:
+            with open(config_file_path) as config_file:
                 self.config = json.load(config_file)
         except FileNotFoundError or json.JSONDecodeError:
             self.config = default_config
-            with open('config.json', 'w') as config_file:
+            with open(config_file_path, 'w') as config_file:
                 json.dump(default_config, config_file)

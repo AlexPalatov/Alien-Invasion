@@ -1,3 +1,4 @@
+import os
 import json
 
 
@@ -29,8 +30,9 @@ class GameStats():
         Restore high score from the score.json file
         Return 0 if no score is saved
         """
+        score_file_path = os.path.join(os.path.dirname(__file__), 'score.json')
         try:
-            with open('score.json', 'r') as high_score_file:
+            with open(score_file_path, 'r') as high_score_file:
                 high_score = json.load(high_score_file)
         except FileNotFoundError:
             return 0
@@ -41,5 +43,6 @@ class GameStats():
 
     def save_high_score(self):
         """Save high score to the file score.json"""
-        with open('score.json', 'w') as high_score_fle:
+        score_file_path = os.path.join(os.path.dirname(__file__), 'score.json')
+        with open(score_file_path, 'w') as high_score_fle:
             json.dump(self.high_score, high_score_fle)

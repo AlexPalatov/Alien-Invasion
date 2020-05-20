@@ -12,7 +12,7 @@ config = {
     # Bullet settings
     'bullet_width': 3,
     'bullet_height': 15,
-    'bullet_color': (60, 60, 60),
+    'bullet_color': (200, 150, 60),
     'bullets_allowed': 3,
     'bullet_speed': 1.5,
 
