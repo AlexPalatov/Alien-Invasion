@@ -309,10 +309,7 @@ def update_aliens(ai_settings, stats, screen, scoreboard,
 def update_screen(ai_settings, screen, stats, scoreboard,
                   ship, aliens, bullets, play_button, bg_image):
     """Update images on the screen and flip to the new screen"""
-    # Disable the timer if it's active
-
     # Redraw the screen during each pass through the loop
-    #screen.fill(ai_settings.bg_color)
     screen.blit(bg_image, (0, 0))
 
     # Redraw all bullets behind ship and aliens
