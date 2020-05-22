@@ -268,8 +268,6 @@ def ship_hit(ai_settings, stats, screen, scoreboard,
     if stats.ships_left > 0:
         # Wait until the collision sound has been played
         collision_sound.play()
-        while pygame.mixer.get_busy():
-            pass
 
         # Decrement ships left
         stats.ships_left -= 1
@@ -284,6 +282,9 @@ def ship_hit(ai_settings, stats, screen, scoreboard,
         # Create a new fleet and center the ship
         create_fleet(ai_settings, screen, ship, aliens)
         ship.center_ship()
+
+        while pygame.mixer.get_busy():
+            pass
     else:
         # Stop the game and make the cursor reappear
         game_over_sound.play()
