@@ -125,7 +125,8 @@ def fire_bullet(ai_settings, screen, ship, bullets, shot_sound):
 
 
 def update_bullets(ai_settings, screen, stats, scoreboard,
-                   ship, aliens, bullets, alien_death_sound, level_up_sound):
+                   ship, aliens, bullets,
+                   alien_death_sound, level_up_sound, bg_image):
     """Update position of bullets and get rid of old bullets"""
     # Update bullet positions
     bullets.update()
@@ -139,12 +140,12 @@ def update_bullets(ai_settings, screen, stats, scoreboard,
     # If so, get rid of the bullet and the alien
     check_bullet_alien_collisions(ai_settings, screen, stats, scoreboard,
                                   ship, aliens, bullets,
-                                  alien_death_sound, level_up_sound)
+                                  alien_death_sound, level_up_sound, bg_image)
 
 
 def check_bullet_alien_collisions(ai_settings, screen, stats, scoreboard,
                                   ship, aliens, bullets,
-                                  alien_death_sound, level_up_sound):
+                                  alien_death_sound, level_up_sound, bg_image):
     """Respond to bullet-alien collisions"""
     # Remove any bullets and aliens that have collided
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
@@ -172,6 +173,25 @@ def check_bullet_alien_collisions(ai_settings, screen, stats, scoreboard,
         scoreboard.prep_level()
 
         create_fleet(ai_settings, screen, ship, aliens)
+
+        # Animate level-up
+        animate_level_up(screen, ship, bg_image)
+
+
+def animate_level_up(screen, ship, bg_image):
+    """Render level-up animation"""
+    # Move ship and background back to the bottom
+    bg_image_rect = bg_image.get_rect()
+
+    new_bg_image_top = - bg_image_rect.height
+    while new_bg_image_top < 0:
+        new_bg_image_top += 2
+        # Draw 'new' (upper) background
+        screen.blit(bg_image, (0, new_bg_image_top))
+        # Draw 'old' (lower) background
+        screen.blit(bg_image, (0, new_bg_image_top + bg_image_rect.height))
+        ship.blitme()
+        pygame.display.flip()
 
 
 def check_high_score(stats, scoreboard):

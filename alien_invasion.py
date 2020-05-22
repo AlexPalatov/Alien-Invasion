@@ -29,7 +29,7 @@ def run_game():
     scoreboard = Scoreboard(ai_settings, screen, stats)
 
     # Load background image
-    bg_image_path = os.path.join(os.path.dirname(__file__), 'images/background.bmp')
+    bg_image_path = os.path.join(os.path.dirname(__file__), 'images/background_2.0.bmp')
     bg_image = pygame.image.load(bg_image_path)
 
     # Load sounds
@@ -59,7 +59,7 @@ def run_game():
             ship.update()
             gf.update_bullets(ai_settings, screen, stats, scoreboard,
                               ship, aliens, bullets,
-                              alien_death_sound, level_up_sound)
+                              alien_death_sound, level_up_sound, bg_image)
             gf.update_aliens(ai_settings, stats, screen, scoreboard,
                              ship, aliens, bullets,
                              collision_sound, game_over_sound)
