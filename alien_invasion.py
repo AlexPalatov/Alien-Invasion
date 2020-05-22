@@ -13,6 +13,7 @@ import game_functions as gf
 
 def run_game():
     # Initialize pygame, settings, and screen object
+    pygame.mixer.pre_init(44100, -16, 1, 512)
     pygame.init()
     pygame.mixer.init()
     ai_settings = Settings()
