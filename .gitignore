@@ -1,0 +1,8 @@
+__pycache__
+
+build/
+dist/
+
+alien_invasion.spec
+
+score.json

@@ -7,8 +7,11 @@ from game_config import config as default_config
 class Settings():
     """A class to store all settings for Alien Invasion"""
 
-    def __init__(self):
+    def __init__(self, base_path):
         """Initialize the game's settings"""
+        # Set base path
+        self.base_path = base_path
+
         # Load the configuration
         self.get_config()
 
@@ -66,7 +69,7 @@ class Settings():
         Load the the game's settings' configuration from config.json.
         Get the default configuration if the config file is missing and save the config
         """
-        config_file_path = os.path.join(os.path.dirname(__file__), 'config.json')
+        config_file_path = os.path.join(self.base_path, 'config.json')
         try:
             with open(config_file_path) as config_file:
                 self.config = json.load(config_file)

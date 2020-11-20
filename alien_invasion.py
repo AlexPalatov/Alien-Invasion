@@ -16,7 +16,7 @@ def run_game():
     pygame.mixer.pre_init(44100, -16, 1, 512)
     pygame.init()
     pygame.mixer.init()
-    ai_settings = Settings()
+    ai_settings = Settings(os.path.dirname(__file__))
     screen = pygame.display.set_mode(
         (ai_settings.screen_width, ai_settings.screen_height)
     )

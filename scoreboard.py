@@ -1,3 +1,5 @@
+import os
+
 import pygame.font
 from pygame.sprite import Group
 
@@ -16,7 +18,8 @@ class Scoreboard():
 
         # Font settings
         self.text_color = 240, 240, 240
-        self.font = pygame.font.Font('fonts/trebuchet_ms.ttf', 30)
+        self.font = pygame.font.Font(
+            os.path.join(self.ai_settings.base_path, 'fonts/trebuchet_ms.ttf'), 30)
 
         # Prepare the initial score images
         self.prep_score()
